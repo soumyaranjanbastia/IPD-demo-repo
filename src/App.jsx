@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Activity, Users, FileText, Calendar, Settings as SettingsIcon, Bell, Search, Menu, UserPlus, LogOut, Shield, Bed, Pill, TestTube, CreditCard, LogOut as DischargeIcon } from 'lucide-react';
+import { Activity, Users, FileText, Calendar, Settings as SettingsIcon, Bell, Search, Menu, UserPlus, LogOut, Shield, Bed, Pill, TestTube, CreditCard, LogOut as DischargeIcon, AlertTriangle, Layers } from 'lucide-react';
 import Dashboard from './pages/Dashboard';
 import PatientRegistration from './pages/PatientRegistration';
 import Consultations from './pages/Consultations';
 import IPD from './pages/IPD';
+import WardBedManagement from './pages/WardBedManagement';
 import Pharmacy from './pages/Pharmacy';
 import Lab from './pages/Lab';
 import Billing from './pages/Billing';
@@ -74,10 +75,16 @@ function Sidebar({ role }) {
           </Link>
         )}
         {hasPermission(role, 'ipd', 'read') && (
-          <Link to="/ipd" className={`nav-item ${isActive('/ipd')}`}>
-            <Bed size={20} />
-            <span>IPD & Wards</span>
-          </Link>
+          <>
+            <Link to="/ipd" className={`nav-item ${isActive('/ipd')}`}>
+              <Bed size={20} />
+              <span>IPD & Inpatients</span>
+            </Link>
+            <Link to="/bed-management" className={`nav-item ${isActive('/bed-management')}`}>
+              <Layers size={20} />
+              <span>Ward & Bed Setup</span>
+            </Link>
+          </>
         )}
         {hasPermission(role, 'pharmacy', 'read') && (
           <Link to="/pharmacy" className={`nav-item ${isActive('/pharmacy')}`}>
@@ -210,6 +217,11 @@ function AppContent() {
                 <Route path="/ipd" element={
                   <ProtectedRoute role={role} module="ipd" action="read">
                     <IPD role={role} />
+                  </ProtectedRoute>
+                } />
+                <Route path="/bed-management" element={
+                  <ProtectedRoute role={role} module="ipd" action="read">
+                    <WardBedManagement role={role} />
                   </ProtectedRoute>
                 } />
                 <Route path="/pharmacy" element={

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Bed, User, CheckCircle, AlertCircle, Clock, CreditCard, Activity, FileText, HeartPulse, Stethoscope, ArrowRightLeft } from 'lucide-react';
+import { Bed, User, UserPlus, CheckCircle, AlertCircle, Clock, CreditCard, Activity, FileText, HeartPulse, Stethoscope, ArrowRightLeft, Layers } from 'lucide-react';
 import { useGlobal } from '../context/GlobalState';
 import { hasPermission } from '../rbac';
+import WardBedManagement from './WardBedManagement';
+import AssignBedModal from '../components/AssignBedModal';
 
 export default function IPD({ role }) {
   const { beds, admissions, allocateBed, holdRoomAndRequestDeposit, patients, masters, vitals, doctorRounds, billing, recordVitals, recordDoctorRound, transferBed } = useGlobal();
@@ -9,6 +11,8 @@ export default function IPD({ role }) {
   
   const [selectedAdmission, setSelectedAdmission] = useState(null);
   const [processingState, setProcessingState] = useState(false);
+  const [showAssignBedModal, setShowAssignBedModal] = useState(false);
+  const [assignBedUhid, setAssignBedUhid] = useState(null);
   const [admissionForm, setAdmissionForm] = useState({});
   const [vitalsForm, setVitalsForm] = useState({});
   const [roundForm, setRoundForm] = useState({});
@@ -85,22 +89,74 @@ export default function IPD({ role }) {
 
   return (
     <div className="animate-fade-in">
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ marginBottom: '22px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h2>In-Patient Department (IPD)</h2>
-          <p style={{ color: 'var(--text-secondary)' }}>End-to-end IPD lifecycle management.</p>
+          <h2 style={{ margin: 0, fontSize: '1.65rem' }}>In-Patient Department (IPD)</h2>
+          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: '0.875rem' }}>End-to-end IPD lifecycle management & patient hospitalization.</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className={`btn ${activeTab === 'QUEUE' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => {setActiveTab('QUEUE'); setProcessingState(false);}}>
-            Admission Queue
-          </button>
-          <button className={`btn ${activeTab === 'ACTIVE' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => {setActiveTab('ACTIVE'); setProcessingState(false);}}>
-            Active Admissions
-          </button>
-          <button className={`btn ${activeTab === 'WARD_MAP' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => {setActiveTab('WARD_MAP'); setProcessingState(false);}}>
-            Ward Map
-          </button>
-        </div>
+        <button 
+          className="btn btn-primary" 
+          style={{ height: '38px', display: 'flex', alignItems: 'center', gap: '6px' }}
+          onClick={() => {
+            setAssignBedUhid(null);
+            setShowAssignBedModal(true);
+          }}
+        >
+          <UserPlus size={16} /> Assign Bed to Patient
+        </button>
+      </div>
+
+      {/* Modern Pill Tab Navigation */}
+      <div style={{ background: 'rgba(241, 245, 249, 0.8)', padding: '5px', borderRadius: '12px', display: 'inline-flex', gap: '4px', marginBottom: '22px', border: '1px solid #e2e8f0', flexWrap: 'wrap' }}>
+        <button 
+          onClick={() => {setActiveTab('QUEUE'); setProcessingState(false);}}
+          style={{
+            padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: activeTab === 'QUEUE' ? 600 : 500,
+            border: 'none', cursor: 'pointer',
+            background: activeTab === 'QUEUE' ? '#ffffff' : 'transparent',
+            color: activeTab === 'QUEUE' ? 'hsl(var(--primary-color))' : 'var(--text-secondary)',
+            boxShadow: activeTab === 'QUEUE' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none'
+          }}
+        >
+          Admission Queue ({pendingAdmissions.length})
+        </button>
+        <button 
+          onClick={() => {setActiveTab('ACTIVE'); setProcessingState(false);}}
+          style={{
+            padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: activeTab === 'ACTIVE' ? 600 : 500,
+            border: 'none', cursor: 'pointer',
+            background: activeTab === 'ACTIVE' ? '#ffffff' : 'transparent',
+            color: activeTab === 'ACTIVE' ? 'hsl(var(--primary-color))' : 'var(--text-secondary)',
+            boxShadow: activeTab === 'ACTIVE' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none'
+          }}
+        >
+          Active Inpatients & Holds ({activeAdmissions.length})
+        </button>
+        <button 
+          onClick={() => {setActiveTab('WARD_MAP'); setProcessingState(false);}}
+          style={{
+            padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: activeTab === 'WARD_MAP' ? 600 : 500,
+            border: 'none', cursor: 'pointer',
+            background: activeTab === 'WARD_MAP' ? '#ffffff' : 'transparent',
+            color: activeTab === 'WARD_MAP' ? 'hsl(var(--primary-color))' : 'var(--text-secondary)',
+            boxShadow: activeTab === 'WARD_MAP' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none'
+          }}
+        >
+          Ward Map
+        </button>
+        <button 
+          onClick={() => {setActiveTab('SETUP'); setProcessingState(false);}}
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: '6px',
+            padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', fontWeight: activeTab === 'SETUP' ? 600 : 500,
+            border: 'none', cursor: 'pointer',
+            background: activeTab === 'SETUP' ? '#ffffff' : 'transparent',
+            color: activeTab === 'SETUP' ? 'hsl(var(--primary-color))' : 'var(--text-secondary)',
+            boxShadow: activeTab === 'SETUP' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none'
+          }}
+        >
+          <Layers size={16} /> Ward & Bed Setup
+        </button>
       </div>
 
       {activeTab === 'QUEUE' && !processingState && (
@@ -190,7 +246,9 @@ export default function IPD({ role }) {
                   <select required className="input-field select-field" onChange={(e) => setAdmissionForm({...admissionForm, bedId: e.target.value})}>
                     <option value="">Select an Available Bed</option>
                     {beds.filter(b => b.status === 'Available').map(b => (
-                      <option key={b.id} value={b.id}>{b.ward} - {b.type} - Bed {b.id}</option>
+                      <option key={b.id} value={b.id}>
+                        {b.ward} {b.roomNumber ? `• Rm ${b.roomNumber}` : ''} • Bed {b.id} ({b.type}) — ₹{b.chargePerDay?.toLocaleString() || 1000}/day
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -359,7 +417,9 @@ export default function IPD({ role }) {
                     <select className="input-field select-field" onChange={(e) => { transferBed(selectedAdmission.id, e.target.value, 'Admin', role); setIsTransferring(false); alert('Bed Transferred!'); }}>
                       <option value="">Select Target Bed...</option>
                       {beds.filter(b => b.status === 'Available').map(b => (
-                        <option key={b.id} value={b.id}>{b.ward} - Bed {b.id}</option>
+                        <option key={b.id} value={b.id}>
+                          {b.ward} {b.roomNumber ? `• Rm ${b.roomNumber}` : ''} • Bed {b.id} ({b.type})
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -435,6 +495,21 @@ export default function IPD({ role }) {
           </div>
         </div>
       )}
+
+      {activeTab === 'SETUP' && (
+        <WardBedManagement role={role} />
+      )}
+
+      {/* Assign Room & Bed to Patient Modal */}
+      <AssignBedModal 
+        isOpen={showAssignBedModal}
+        onClose={() => {
+          setShowAssignBedModal(false);
+          setAssignBedUhid(null);
+        }}
+        initialUhid={assignBedUhid}
+        role={role}
+      />
     </div>
   );
 }

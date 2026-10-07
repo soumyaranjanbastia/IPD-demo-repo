@@ -119,8 +119,8 @@ export default function Dashboard({ role }) {
               </button>
             )}
             {['SUPER_ADMIN', 'NURSE', 'DOCTOR'].includes(role) && (
-              <button className="btn btn-secondary" style={{ justifyContent: 'center' }} onClick={() => navigate('/ipd')}>
-                Ward Management
+              <button className="btn btn-secondary" style={{ justifyContent: 'center' }} onClick={() => navigate('/bed-management')}>
+                Ward & Bed Management
               </button>
             )}
             {['SUPER_ADMIN', 'BILLING_EXECUTIVE'].includes(role) && (

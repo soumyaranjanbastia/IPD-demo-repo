@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { User, Phone, MapPin, Calendar as CalIcon, Shield, CreditCard, CheckCircle, FileText, AlertCircle, Heart, FileSignature } from 'lucide-react';
+import { User, Phone, MapPin, Calendar as CalIcon, Shield, CreditCard, CheckCircle, FileText, AlertCircle, Heart, FileSignature, Bed } from 'lucide-react';
 import { useGlobal } from '../context/GlobalState';
+import AssignBedModal from '../components/AssignBedModal';
 
 const WORKFLOW_STATES = ['PERSONAL_DETAILS', 'CONTACT_ADDRESS', 'IDENTITY_EMERGENCY', 'VISIT_INSURANCE', 'MEDICAL_INFO', 'CONSENT_FEE'];
 
@@ -10,6 +11,7 @@ export default function PatientRegistration({ role }) {
     paymentType: 'Self Pay'
   });
   const [newUhid, setNewUhid] = useState('');
+  const [showAssignBedModal, setShowAssignBedModal] = useState(false);
   
   const { registerPatient, addToOpdQueue } = useGlobal();
 
@@ -431,9 +433,17 @@ export default function PatientRegistration({ role }) {
               <p style={{ color: 'var(--text-secondary)', marginTop: '8px', marginBottom: '32px', fontSize: '1.1rem' }}>
                 Patient UHID: <strong style={{ color: 'var(--text-primary)' }}>{newUhid}</strong>
               </p>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-primary" 
+                  onClick={() => setShowAssignBedModal(true)}
+                  style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'linear-gradient(135deg, hsl(var(--primary-color)), hsl(var(--accent-color)))' }}
+                >
+                  <Bed size={16} /> Assign Room & Bed to Patient
+                </button>
                 <button type="button" className="btn btn-secondary" onClick={() => { setWorkflowState(0); setPatientData({ paymentType: 'Self Pay' }); setNewUhid(''); }}>
-                  Register New Patient
+                  Register Another Patient
                 </button>
               </div>
             </div>
@@ -453,6 +463,14 @@ export default function PatientRegistration({ role }) {
           )}
         </form>
       </div>
+
+      {/* Direct Room & Bed Assignment Modal */}
+      <AssignBedModal 
+        isOpen={showAssignBedModal}
+        onClose={() => setShowAssignBedModal(false)}
+        initialUhid={newUhid}
+        role={role}
+      />
     </div>
   );
 }
